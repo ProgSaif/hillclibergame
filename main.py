@@ -34,9 +34,6 @@ class Car:
         self.alive = True
 
     def update(self, terrain_height):
-        keys = pygame.key.get_pressed()
-
-        # auto acceleration (because web can't detect keyboard)
         if self.fuel > 0:
             self.speed += 0.05
             self.fuel -= 0.03
@@ -70,13 +67,8 @@ car = Car()
 def terrain_height(x):
     return int(300 + 80 * math.sin(x * 0.01))
 
-coins = []
-for i in range(80):
-    coins.append([random.randint(400, 7000), random.randint(150, 300)])
-
-fuel_cans = []
-for i in range(20):
-    fuel_cans.append([random.randint(600, 7000), random.randint(150, 300)])
+coins = [[random.randint(400,7000), random.randint(150,300)] for _ in range(80)]
+fuel_cans = [[random.randint(600,7000), random.randint(150,300)] for _ in range(20)]
 
 score = 0
 scroll = 0
@@ -85,36 +77,25 @@ while True:
     clock.tick(30)
     screen.fill(BLUE)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-
     if car.alive:
         car.update(terrain_height)
         scroll = car.x - 200
 
-    # terrain
     for x in range(WIDTH):
         world_x = x + scroll
         y = terrain_height(world_x)
         pygame.draw.line(screen, GREEN, (x,y), (x,HEIGHT))
 
-    # coins
     for coin in coins[:]:
         screen_x = coin[0] - scroll
-        if -50 < screen_x < WIDTH+50:
-            pygame.draw.circle(screen, YELLOW, (int(screen_x), coin[1]), 10)
-
+        pygame.draw.circle(screen, YELLOW, (int(screen_x), coin[1]), 10)
         if abs(car.x - coin[0]) < 40 and abs(car.y - coin[1]) < 40:
             coins.remove(coin)
             score += 10
 
-    # fuel
     for fuel in fuel_cans[:]:
         screen_x = fuel[0] - scroll
-        if -50 < screen_x < WIDTH+50:
-            pygame.draw.rect(screen, RED, (screen_x, fuel[1], 20, 25))
-
+        pygame.draw.rect(screen, RED, (screen_x, fuel[1], 20, 25))
         if abs(car.x - fuel[0]) < 40 and abs(car.y - fuel[1]) < 40:
             fuel_cans.remove(fuel)
             car.fuel = min(100, car.fuel + 30)
@@ -127,10 +108,8 @@ while True:
     screen.blit(score_text, (20,50))
 
     if not car.alive:
-        over = font.render("GAME OVER", True, WHITE)
-        screen.blit(over, (450,250))
+        screen.blit(font.render("GAME OVER", True, WHITE), (450,250))
 
     pygame.display.update()
     pygame.image.save(screen, "frame.png")
-
     time.sleep(0.03)
