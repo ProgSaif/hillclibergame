@@ -1,6 +1,17 @@
 import os
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 
+# ---- START WEB SERVER FOR REPLIT PREVIEW ----
+import threading
+from http.server import SimpleHTTPRequestHandler, HTTPServer
+
+def start_server():
+    server = HTTPServer(("0.0.0.0", 8000), SimpleHTTPRequestHandler)
+    server.serve_forever()
+
+threading.Thread(target=start_server, daemon=True).start()
+# ---------------------------------------------
+
 import pygame
 import random
 import math
@@ -81,11 +92,13 @@ while True:
         car.update(terrain_height)
         scroll = car.x - 200
 
+    # Terrain
     for x in range(WIDTH):
         world_x = x + scroll
         y = terrain_height(world_x)
         pygame.draw.line(screen, GREEN, (x,y), (x,HEIGHT))
 
+    # Coins
     for coin in coins[:]:
         screen_x = coin[0] - scroll
         pygame.draw.circle(screen, YELLOW, (int(screen_x), coin[1]), 10)
@@ -93,6 +106,7 @@ while True:
             coins.remove(coin)
             score += 10
 
+    # Fuel
     for fuel in fuel_cans[:]:
         screen_x = fuel[0] - scroll
         pygame.draw.rect(screen, RED, (screen_x, fuel[1], 20, 25))
